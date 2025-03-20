@@ -1,0 +1,40 @@
+services:
+  web:
+    build: .
+    command: >
+      sh -c "python manage.py migrate &&
+            python manage.py collectstatic --noinput &&
+            python manage.py runserver 0.0.0.0:8000 --insecure"
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+      - db
+    environment:
+      - SECRET_KEY=django-insecure-b=ep!k9a^#^d!n^_po1(v0)-7g_35cxj)haagxrb!93qg_c6+o
+      - DB_ENGINE=django.db.backends.postgresql
+      - DB_NAME=taskmanager
+      - DB_USER=admin
+      - DB_PASSWORD=adminpassword
+      - DB_HOST=db
+      - DB_PORT=5432
+      - REDIS_URL=redis://redis:6379/1
+
+  db:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=taskmanager
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=adminpassword
+
+  redis:
+    image: redis:6
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_data:
